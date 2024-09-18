@@ -415,9 +415,6 @@ class LLM:
                 add_generation_prompt=add_generation_prompt,
                 tools=tools,
             )
-            # hww
-            if isinstance(prompt, str) and add_generation_prompt == False:
-                prompt = prompt.rstrip("\n").removesuffix("<|im_end|>")
 
         inputs: PromptInputs
         if is_list_of(prompt, int):
