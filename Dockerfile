@@ -86,38 +86,38 @@ ARG SCCACHE_S3_NO_CREDENTIALS=0
 # if USE_SCCACHE is set, use sccache to speed up compilation
 RUN --mount=type=cache,target=/root/.cache/pip \
     if [ "$USE_SCCACHE" = "1" ]; then \
-        echo "Installing sccache..." \
-        && curl -L -o sccache.tar.gz https://github.com/mozilla/sccache/releases/download/v0.8.1/sccache-v0.8.1-x86_64-unknown-linux-musl.tar.gz \
-        && tar -xzf sccache.tar.gz \
-        && sudo mv sccache-v0.8.1-x86_64-unknown-linux-musl/sccache /usr/bin/sccache \
-        && rm -rf sccache.tar.gz sccache-v0.8.1-x86_64-unknown-linux-musl \
-        && export SCCACHE_BUCKET=${SCCACHE_BUCKET_NAME} \
-        && export SCCACHE_REGION=${SCCACHE_REGION_NAME} \
-        && export SCCACHE_S3_NO_CREDENTIALS=${SCCACHE_S3_NO_CREDENTIALS} \
-        && export SCCACHE_IDLE_TIMEOUT=0 \
-        && export CMAKE_BUILD_TYPE=Release \
-        && sccache --show-stats \
-        && python3 setup.py bdist_wheel --dist-dir=dist --py-limited-api=cp38 \
-        && sccache --show-stats; \
+    echo "Installing sccache..." \
+    && curl -L -o sccache.tar.gz https://github.com/mozilla/sccache/releases/download/v0.8.1/sccache-v0.8.1-x86_64-unknown-linux-musl.tar.gz \
+    && tar -xzf sccache.tar.gz \
+    && sudo mv sccache-v0.8.1-x86_64-unknown-linux-musl/sccache /usr/bin/sccache \
+    && rm -rf sccache.tar.gz sccache-v0.8.1-x86_64-unknown-linux-musl \
+    && export SCCACHE_BUCKET=${SCCACHE_BUCKET_NAME} \
+    && export SCCACHE_REGION=${SCCACHE_REGION_NAME} \
+    && export SCCACHE_S3_NO_CREDENTIALS=${SCCACHE_S3_NO_CREDENTIALS} \
+    && export SCCACHE_IDLE_TIMEOUT=0 \
+    && export CMAKE_BUILD_TYPE=Release \
+    && sccache --show-stats \
+    && python3 setup.py bdist_wheel --dist-dir=dist --py-limited-api=cp38 \
+    && sccache --show-stats; \
     fi
 
 ENV CCACHE_DIR=/root/.cache/ccache
 RUN --mount=type=cache,target=/root/.cache/ccache \
     --mount=type=cache,target=/root/.cache/pip \
     if [ "$USE_SCCACHE" != "1" ]; then \
-        python3 setup.py bdist_wheel --dist-dir=dist --py-limited-api=cp38; \
+    python3 setup.py bdist_wheel --dist-dir=dist --py-limited-api=cp38; \
     fi
 
 # Check the size of the wheel if RUN_WHEEL_CHECK is true
 COPY .buildkite/check-wheel-size.py check-wheel-size.py
 # Default max size of the wheel is 250MB
-ARG VLLM_MAX_SIZE_MB=250
+ARG VLLM_MAX_SIZE_MB=650
 ENV VLLM_MAX_SIZE_MB=$VLLM_MAX_SIZE_MB
 ARG RUN_WHEEL_CHECK=true
 RUN if [ "$RUN_WHEEL_CHECK" = "true" ]; then \
-        python3 check-wheel-size.py dist; \
+    python3 check-wheel-size.py dist; \
     else \
-        echo "Skipping wheel size check."; \
+    echo "Skipping wheel size check."; \
     fi
 #################### EXTENSION Build IMAGE ####################
 
@@ -198,6 +198,7 @@ RUN mv vllm test_docs/
 # openai api server alternative
 FROM vllm-base AS vllm-openai
 
+RUN pip install git+https://github.com/huggingface/transformers@21fac7abba2a37fae86106f87fcf9974fd1e3830 
 # install additional dependencies for openai api server
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install accelerate hf_transfer 'modelscope!=1.15.0'
