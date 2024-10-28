@@ -200,7 +200,7 @@ RUN mv vllm test_docs/
 # openai api server alternative
 FROM vllm-base AS vllm-openai
 
-RUN pip install git+https://github.com/huggingface/transformers@21fac7abba2a37fae86106f87fcf9974fd1e3830 
+# RUN pip install git+https://github.com/huggingface/transformers@21fac7abba2a37fae86106f87fcf9974fd1e3830 
 # install additional dependencies for openai api server
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install accelerate hf_transfer 'modelscope!=1.15.0'
