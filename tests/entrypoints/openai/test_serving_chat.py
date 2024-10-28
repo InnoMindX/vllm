@@ -16,14 +16,21 @@ BASE_MODEL_PATHS = [BaseModelPath(name=MODEL_NAME, model_path=MODEL_NAME)]
 
 
 @dataclass
+class MockHFConfig:
+    model_type: str = "any"
+
+
+@dataclass
 class MockModelConfig:
+    task = "generate"
     tokenizer = MODEL_NAME
     trust_remote_code = False
     tokenizer_mode = "auto"
+    chat_template_text_format = "string"
     max_model_len = 100
     tokenizer_revision = None
-    embedding_mode = False
     multimodal_config = MultiModalConfig()
+    hf_config = MockHFConfig()
 
 
 @dataclass
